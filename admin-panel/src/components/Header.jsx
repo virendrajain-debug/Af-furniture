@@ -1,4 +1,8 @@
-function Header({ onLogout, onMenuToggle }) {
+import { useNavigate } from 'react-router-dom'
+
+function Header({ onLogout, onMenuToggle, profileImage }) {
+  const navigate = useNavigate()
+
   return (
     <header className="dashboard-header">
       <div className="header-left">
@@ -13,8 +17,14 @@ function Header({ onLogout, onMenuToggle }) {
       </div>
 
       <div className="header-right">
-        <div className="header-user">
-          <div className="user-avatar">A</div>
+        <div className="header-user" onClick={() => navigate('/dashboard/profile')} style={{ cursor: 'pointer' }}>
+          <div className="user-avatar">
+            {profileImage ? (
+              <img src={profileImage} alt="Admin" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
+            ) : (
+              'A'
+            )}
+          </div>
           <span className="user-email">admin@gmail.com</span>
         </div>
         <button className="logout-btn" onClick={onLogout}>

@@ -1,6 +1,6 @@
 import { NavLink } from 'react-router-dom'
 
-function Sidebar({ isOpen, onClose }) {
+function Sidebar({ isOpen, onClose, profileImage }) {
   const navItems = [
     { to: '/dashboard', label: 'Dashboard', icon: 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6', end: true },
     { to: '/dashboard/categories', label: 'Categories', icon: 'M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z' },
@@ -15,7 +15,11 @@ function Sidebar({ isOpen, onClose }) {
       {isOpen && <div className="sidebar-overlay" onClick={onClose} />}
       <aside className={`sidebar ${isOpen ? 'sidebar-open' : ''}`}>
         <div className="sidebar-header">
-          <img src="/aeryp.png" alt="AF Furniture" className="sidebar-logo" />
+          {profileImage ? (
+            <img src={profileImage} alt="Admin" className="sidebar-logo" style={{ objectFit: 'cover' }} />
+          ) : (
+            <img src="/serthkuyghj.png" alt="AF Furniture" className="sidebar-logo" />
+          )}
           <span className="sidebar-brand">AF Furniture</span>
         </div>
 

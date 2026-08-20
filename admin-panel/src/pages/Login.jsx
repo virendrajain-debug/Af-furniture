@@ -34,7 +34,7 @@ function Login({ onLogin }) {
       {toast && <div className={`toast ${toast.type}`}>{toast.msg}</div>}
 
       <div className="login-card">
-        <img src="/aeryp.png" alt="AF Furniture" className="logo" />
+        <img src="/serthkuyghj.png" alt="AF Furniture" className="logo" />
         <h2>Admin Panel</h2>
 
         <form onSubmit={handleLogin}>
