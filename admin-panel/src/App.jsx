@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import Login from './pages/Login'
 import ForgotPassword from './pages/ForgotPassword'
 import OTP from './pages/OTP'
+import NewPassword from './pages/NewPassword' 
 import Dashboard from './pages/Dashboard'
 import './App.css'
 
@@ -46,6 +47,14 @@ function App() {
             isLoggedIn ? <Navigate to="/dashboard" replace /> : <OTP onResetComplete={handleLogout} />
           }
         />
+        
+        <Route
+          path="/new-password"
+          element={
+            isLoggedIn ? <Navigate to="/dashboard" replace /> : <NewPassword />
+          }
+        />
+        
         <Route
           path="/dashboard/*"
           element={

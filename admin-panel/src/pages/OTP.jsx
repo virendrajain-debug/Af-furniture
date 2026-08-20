@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 
-function OTP({ onResetComplete }) {
+function OTP() {
   const [otp, setOtp] = useState(['', '', '', '', '', ''])
   const [loading, setLoading] = useState(false)
   const [toast, setToast] = useState(null)
@@ -46,9 +46,10 @@ function OTP({ onResetComplete }) {
     setLoading(true)
     setTimeout(() => {
       if (code === '123456') {
-        showToast('Password reset successful!', 'success')
-        onResetComplete()
-        setTimeout(() => navigate('/'), 800)
+       
+        showToast('OTP Verified!', 'success')
+      
+        setTimeout(() => navigate('/new-password'), 800)
       } else {
         showToast('Invalid OTP. Try 123456', 'error')
       }

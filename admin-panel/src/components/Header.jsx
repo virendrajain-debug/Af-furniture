@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 
-function Header({ onLogout, onMenuToggle, profileImage }) {
+function Header({ onMenuToggle, profileImage }) {
   const navigate = useNavigate()
 
   return (
@@ -27,14 +27,6 @@ function Header({ onLogout, onMenuToggle, profileImage }) {
           </div>
           <span className="user-email">admin@gmail.com</span>
         </div>
-        <button className="logout-btn" onClick={onLogout}>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4" />
-            <polyline points="16 17 21 12 16 7" />
-            <line x1="21" y1="12" x2="9" y2="12" />
-          </svg>
-          Logout
-        </button>
       </div>
     </header>
   )
