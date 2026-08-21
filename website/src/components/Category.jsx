@@ -1,3 +1,17 @@
+// ============================================================
+// Category Banner Component
+// ============================================================
+// Reusable category hero banner with background image and CTA.
+//
+// PROPS:
+//   id       - HTML anchor ID for navigation
+//   title    - Category name (e.g., "Bedroom")
+//   subtitle - Short tagline
+//   image    - Background image URL
+//   link     - CTA button link
+//   reverse  - If true, reverses the layout direction
+// ============================================================
+
 function Category({ id, title, subtitle, image, link, reverse }) {
   return (
     <section className={`category ${reverse ? 'reverse' : ''}`} id={id}>

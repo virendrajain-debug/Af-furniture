@@ -1,3 +1,16 @@
+// ============================================================
+// OTP Verification Page Component
+// ============================================================
+// 6-digit OTP input for password reset verification.
+// Calls POST /api/auth/verify-otp to validate the code.
+//
+// FEATURES:
+//   - Auto-focus next input on digit entry
+//   - Backspace goes to previous input
+//   - Paste support (paste full 6-digit code)
+//   - Numeric-only validation
+// ============================================================
+
 import { useState, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 
@@ -13,23 +26,25 @@ function OTP({ onResetComplete }) {
     setTimeout(() => setToast(null), 3000)
   }
 
+  // Handle single digit input - auto-advance to next box
   const handleChange = (index, value) => {
-    if (!/^\d*$/.test(value)) return
+    if (!/^\d*$/.test(value)) return // Only allow digits
     const newOtp = [...otp]
-    newOtp[index] = value.slice(-1)
+    newOtp[index] = value.slice(-1) // Take only last character
     setOtp(newOtp)
-
     if (value && index < 5) {
       inputRefs.current[index + 1]?.focus()
     }
   }
 
+  // Handle backspace - go to previous input if current is empty
   const handleKeyDown = (index, e) => {
     if (e.key === 'Backspace' && !otp[index] && index > 0) {
       inputRefs.current[index - 1]?.focus()
     }
   }
 
+  // Handle paste - fill all 6 boxes at once
   const handlePaste = (e) => {
     e.preventDefault()
     const pasted = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6)
@@ -38,22 +53,34 @@ function OTP({ onResetComplete }) {
     inputRefs.current[Math.min(pasted.length, 5)]?.focus()
   }
 
-  const handleVerify = (e) => {
+  // Verify OTP with API
+  const handleVerify = async (e) => {
     e.preventDefault()
     const code = otp.join('')
     if (code.length !== 6) return showToast('Please enter complete OTP', 'warning')
 
+    const email = localStorage.getItem('af_reset_email')
     setLoading(true)
-    setTimeout(() => {
-      if (code === '123456') {
-        showToast('Password reset successful!', 'success')
+    try {
+      const res = await fetch('/api/auth/verify-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, otp: code }),
+      })
+      const data = await res.json()
+
+      if (res.ok) {
+        showToast('OTP verified! You can now reset your password.', 'success')
+        localStorage.setItem('af_reset_token', data.resetToken)
         onResetComplete()
         setTimeout(() => navigate('/'), 800)
       } else {
-        showToast('Invalid OTP. Try 123456', 'error')
+        showToast(data.message || 'Invalid OTP', 'error')
       }
-      setLoading(false)
-    }, 1200)
+    } catch {
+      showToast('Server error', 'error')
+    }
+    setLoading(false)
   }
 
   return (

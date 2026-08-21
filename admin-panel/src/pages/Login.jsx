@@ -1,3 +1,18 @@
+// ============================================================
+// Login Page Component
+// ============================================================
+// Admin login form with email/password fields.
+// Calls POST /api/auth/login to authenticate.
+// On success, receives JWT token and passes it to parent (App).
+//
+// FEATURES:
+//   - Show/hide password toggle
+//   - Form validation
+//   - Loading state during API call
+//   - Toast notifications for success/error
+//   - Link to Forgot Password page
+// ============================================================
+
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 
@@ -8,25 +23,37 @@ function Login({ onLogin }) {
   const [loading, setLoading] = useState(false)
   const [toast, setToast] = useState(null)
 
+  // Show a toast notification (auto-dismiss after 3 seconds)
   const showToast = (msg, type) => {
     setToast({ msg, type })
     setTimeout(() => setToast(null), 3000)
   }
 
-  const handleLogin = (e) => {
+  // Handle form submission - call login API
+  const handleLogin = async (e) => {
     e.preventDefault()
     if (!email || !password) return showToast('Please fill all fields', 'warning')
 
     setLoading(true)
-    setTimeout(() => {
-      if (email === 'admin@gmail.com' && password === 'admin123') {
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      })
+      const data = await res.json()
+
+      if (res.ok) {
         showToast('Login successful!', 'success')
-        setTimeout(() => onLogin(), 600)
+        // Pass token to parent after brief delay (show success toast first)
+        setTimeout(() => onLogin(data.token), 600)
       } else {
-        showToast('Invalid credentials', 'error')
+        showToast(data.message || 'Invalid credentials', 'error')
       }
-      setLoading(false)
-    }, 1200)
+    } catch {
+      showToast('Server error. Is the backend running?', 'error')
+    }
+    setLoading(false)
   }
 
   return (

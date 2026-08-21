@@ -1,29 +1,71 @@
+// ============================================================
+// Header / Navigation Component
+// ============================================================
+// Sticky header with logo, navigation links, search bar, and social icons.
+//
+// FEATURES:
+//   - Mobile hamburger menu toggle
+//   - Smooth scroll navigation (anchor links)
+//   - Search form (scrolls to products section)
+//   - Instagram/Facebook social links
+//   - Sticky positioning (stays at top on scroll)
+//
+// NAVIGATION LINKS:
+//   Home, Lounge, Bedroom, Winz (was Sofas), Dining,
+//   Living, About, Contact, Terms, On Sale!
+// ============================================================
+
 import { useState } from 'react'
 
 function Header() {
   const [menuOpen, setMenuOpen] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
+
+  // Handle search form submission - scroll to products
+  const handleSearch = (e) => {
+    e.preventDefault()
+    if (searchQuery.trim()) {
+      const el = document.getElementById('winz')
+      if (el) el.scrollIntoView({ behavior: 'smooth' })
+    }
+  }
 
   return (
     <header className="site-header">
       <a className="logo" href="#home">
         <img src="/logo.png" alt="AF Furnishings" />
       </a>
+
+      {/* Mobile hamburger button */}
       <button className="nav-toggle" onClick={() => setMenuOpen(!menuOpen)} aria-label="Open menu">
-        ☰
+        &#9776;
       </button>
+
+      {/* Navigation links */}
       <nav className={menuOpen ? 'open' : ''}>
         <a href="#home" onClick={() => setMenuOpen(false)}>Home</a>
         <a href="#lounge" onClick={() => setMenuOpen(false)}>Lounge</a>
         <a href="#bedroom" onClick={() => setMenuOpen(false)}>Bedroom</a>
-        <a href="#sofas" onClick={() => setMenuOpen(false)}>Sofas</a>
+        <a href="#winz" onClick={() => setMenuOpen(false)}>Winz</a>
         <a href="#dining" onClick={() => setMenuOpen(false)}>Dining</a>
         <a href="#living" onClick={() => setMenuOpen(false)}>Living</a>
+        <a href="#about" onClick={() => setMenuOpen(false)}>About</a>
+        <a href="#contact" onClick={() => setMenuOpen(false)}>Contact</a>
+        <a href="#terms" onClick={() => setMenuOpen(false)}>Terms</a>
         <a className="sale-link" href="#deals" onClick={() => setMenuOpen(false)}>On Sale!</a>
       </nav>
+
+      {/* Search bar and social icons */}
       <div className="header-tools">
-        <form className="header-search" role="search">
-          <input type="search" aria-label="Search products" placeholder="Search furniture..." />
-          <button aria-label="Search">⌕</button>
+        <form className="header-search" role="search" onSubmit={handleSearch}>
+          <input
+            type="search"
+            aria-label="Search products"
+            placeholder="Search furniture..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+          <button aria-label="Search" type="submit">&#8981;</button>
         </form>
         <div className="header-social">
           <a href="https://www.instagram.com/" target="_blank" rel="noopener noreferrer" aria-label="Instagram">

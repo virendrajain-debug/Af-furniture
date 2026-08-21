@@ -1,3 +1,10 @@
+// ============================================================
+// Hero Section Component
+// ============================================================
+// Full-width hero banner with background image, headline, and CTA.
+// Features a decorative curved shape in the bottom-right corner.
+// ============================================================
+
 function Hero() {
   return (
     <section className="hero">

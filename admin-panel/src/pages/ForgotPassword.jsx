@@ -1,3 +1,11 @@
+// ============================================================
+// Forgot Password Page Component
+// ============================================================
+// Allows admin to request a password reset OTP.
+// Calls POST /api/auth/forgot-password with the email.
+// On success, navigates to /otp page for verification.
+// ============================================================
+
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 
@@ -12,16 +20,27 @@ function ForgotPassword() {
     setTimeout(() => setToast(null), 3000)
   }
 
-  const handleSubmit = (e) => {
+  // Submit email to request OTP
+  const handleSubmit = async (e) => {
     e.preventDefault()
     if (!email) return showToast('Please enter your email', 'warning')
 
     setLoading(true)
-    setTimeout(() => {
-      showToast('OTP sent to your email', 'success')
-      setLoading(false)
+    try {
+      const res = await fetch('/api/auth/forgot-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      })
+      const data = await res.json()
+      showToast(data.message, 'success')
+      // Save email for OTP page
+      localStorage.setItem('af_reset_email', email)
       setTimeout(() => navigate('/otp'), 800)
-    }, 1200)
+    } catch {
+      showToast('Server error', 'error')
+    }
+    setLoading(false)
   }
 
   return (

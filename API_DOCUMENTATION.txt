@@ -1,0 +1,490 @@
+# ============================================================
+# AF Furnishings - Complete API Reference
+# ============================================================
+# Base URL: http://localhost:5000/api
+#
+# This document lists every API endpoint, what it does,
+# what data it expects, and what it returns.
+#
+# HOW TO CONNECT:
+#   1. Start MySQL and create database: CREATE DATABASE af_furniture;
+#   2. Run migrations: cd backend && npm run migrate
+#   3. Seed data: npm run seed
+#   4. Start backend: npm run dev
+#   5. Start admin panel: cd ../admin-panel && npm run dev
+#   6. Start website: cd ../website && npm run dev
+#
+# AUTHENTICATION:
+#   Protected endpoints require a JWT token in the header:
+#   Authorization: Bearer <your-jwt-token>
+#   Get the token from POST /api/auth/login
+# ============================================================
+
+
+# ============================================================
+# 1. AUTHENTICATION ROUTES
+# ============================================================
+
+# ---- POST /api/auth/login ----
+# Login with email and password. Returns JWT token.
+#
+# Request Body:
+#   {
+#     "email": "admin@gmail.com",
+#     "password": "admin123"
+#   }
+#
+# Success Response (200):
+#   {
+#     "message": "Login successful",
+#     "token": "eyJhbGciOiJIUzI1NiIs...",
+#     "user": {
+#       "id": 1,
+#       "name": "Admin",
+#       "email": "admin@gmail.com",
+#       "role": "admin",
+#       "profile_image": null
+#     }
+#   }
+#
+# Error Response (401):
+#   { "message": "Invalid credentials" }
+
+
+# ---- POST /api/auth/forgot-password ----
+# Request a password reset OTP (sent to email).
+#
+# Request Body:
+#   { "email": "admin@gmail.com" }
+#
+# Response (200):
+#   { "message": "OTP sent to your email" }
+#
+# NOTE: In development, the OTP is logged to the server console.
+#       Check the terminal running the backend to see it.
+
+
+# ---- POST /api/auth/verify-otp ----
+# Verify the 6-digit OTP code.
+#
+# Request Body:
+#   {
+#     "email": "admin@gmail.com",
+#     "otp": "123456"
+#   }
+#
+# Success Response (200):
+#   {
+#     "message": "OTP verified successfully",
+#     "resetToken": "eyJhbGciOiJIUzI1NiIs..."
+#   }
+#
+# Error Response (400):
+#   { "message": "Invalid OTP" }
+
+
+# ---- POST /api/auth/reset-password ----
+# Set a new password using the reset token.
+#
+# Request Body:
+#   {
+#     "email": "admin@gmail.com",
+#     "newPassword": "newpassword123",
+#     "resetToken": "eyJhbGciOiJIUzI1NiIs..."
+#   }
+#
+# Response (200):
+#   { "message": "Password reset successful" }
+
+
+# ---- GET /api/auth/profile ----
+# Get the logged-in user's profile.
+# REQUIRES AUTHENTICATION
+#
+# Headers:
+#   Authorization: Bearer <token>
+#
+# Response (200):
+#   {
+#     "id": 1,
+#     "name": "Admin",
+#     "email": "admin@gmail.com",
+#     "profile_image": "data:image/jpeg;base64,...",
+#     "role": "admin"
+#   }
+
+
+# ---- PUT /api/auth/profile ----
+# Update the logged-in user's profile.
+# REQUIRES AUTHENTICATION
+#
+# Headers:
+#   Authorization: Bearer <token>
+#
+# Request Body:
+#   {
+#     "name": "New Name",
+#     "email": "new@email.com",
+#     "profile_image": "data:image/jpeg;base64,..."
+#   }
+#
+# Response (200):
+#   { "message": "Profile updated successfully" }
+
+
+# ---- PUT /api/auth/change-password ----
+# Change the logged-in user's password.
+# REQUIRES AUTHENTICATION
+#
+# Headers:
+#   Authorization: Bearer <token>
+#
+# Request Body:
+#   {
+#     "currentPassword": "admin123",
+#     "newPassword": "newpassword123"
+#   }
+#
+# Response (200):
+#   { "message": "Password changed successfully" }
+#
+# Error Response (401):
+#   { "message": "Current password is incorrect" }
+
+
+# ============================================================
+# 2. PRODUCT ROUTES
+# ============================================================
+
+# ---- GET /api/products ----
+# List all products with optional filters.
+# PUBLIC (no authentication required)
+#
+# Query Parameters (all optional):
+#   ?category=Living Room    - Filter by category name
+#   ?search=sofa             - Search in name and description
+#   ?featured=true           - Only featured products
+#   ?new_arrival=true        - Only new arrivals
+#   ?limit=4                 - Limit number of results
+#
+# Example:
+#   GET /api/products?category=Bedroom&limit=2
+#
+# Response (200):
+#   [
+#     {
+#       "id": 1,
+#       "name": "Marina Lounge Chair",
+#       "category_id": 1,
+#       "category_name": "Living Room",
+#       "mrp": 1299,
+#       "selling_price": 1099,
+#       "discounted_price": null,
+#       "description": "Comfortable lounge chair...",
+#       "stock": 15,
+#       "material": "Oak Wood",
+#       "color": "Grey",
+#       "size": "Medium",
+#       "dimensions": null,
+#       "weight": null,
+#       "warranty": null,
+#       "delivery_info": null,
+#       "featured": 1,
+#       "new_arrival": 0,
+#       "images": [],
+#       "created_at": "2026-08-21T00:00:00.000Z"
+#     },
+#     ...
+#   ]
+
+
+# ---- GET /api/products/:id ----
+# Get a single product by ID.
+# PUBLIC
+#
+# Example: GET /api/products/5
+#
+# Response (200):
+#   { "id": 5, "name": "Willow Bedroom Set", ... }
+
+
+# ---- POST /api/products ----
+# Create a new product. REQUIRES AUTHENTICATION.
+# Supports multipart form data for image uploads.
+#
+# Headers:
+#   Authorization: Bearer <token>
+#
+# Request Body (multipart/form-data):
+#   name              (required) - Product name
+#   category_id       (optional) - Category ID
+#   mrp               (required) - Maximum Retail Price
+#   selling_price     (optional) - Current selling price
+#   discounted_price  (optional) - Discounted price
+#   description       (optional) - Product description
+#   stock             (optional) - Stock quantity
+#   material          (optional) - Material info
+#   color             (optional) - Color info
+#   size              (optional) - Size
+#   dimensions        (optional) - Dimensions
+#   weight            (optional) - Weight in kg
+#   warranty          (optional) - Warranty info
+#   delivery_info     (optional) - Delivery information
+#   featured          (optional) - "true" or "false"
+#   new_arrival       (optional) - "true" or "false"
+#   images            (optional) - File uploads (up to 10)
+#
+# Response (201):
+#   { "message": "Product created successfully", "id": 13 }
+
+
+# ---- PUT /api/products/:id ----
+# Update an existing product. REQUIRES AUTHENTICATION.
+# Same fields as POST /api/products.
+#
+# Response (200):
+#   { "message": "Product updated successfully" }
+
+
+# ---- DELETE /api/products/:id ----
+# Delete a product. REQUIRES AUTHENTICATION.
+#
+# Response (200):
+#   { "message": "Product deleted successfully" }
+
+
+# ============================================================
+# 3. CATEGORY ROUTES
+# ============================================================
+
+# ---- GET /api/categories ----
+# List all categories with product counts.
+# PUBLIC
+#
+# Response (200):
+#   [
+#     { "id": 1, "name": "Bedroom", "product_count": 4, "created_at": "..." },
+#     { "id": 2, "name": "Dining", "product_count": 4, "created_at": "..." },
+#     { "id": 3, "name": "Living Room", "product_count": 4, "created_at": "..." }
+#   ]
+
+
+# ---- POST /api/categories ----
+# Create a new category. REQUIRES AUTHENTICATION.
+#
+# Request Body:
+#   { "name": "Office" }
+#
+# Response (201):
+#   { "message": "Category created", "id": 6, "name": "Office" }
+
+
+# ---- DELETE /api/categories/:id ----
+# Delete a category. REQUIRES AUTHENTICATION.
+# Products in this category will have category_id set to NULL.
+#
+# Response (200):
+#   { "message": "Category deleted" }
+
+
+# ============================================================
+# 4. ABOUT ROUTES
+# ============================================================
+
+# ---- GET /api/about ----
+# Get company information for the About section.
+# PUBLIC
+#
+# Response (200):
+#   {
+#     "id": 1,
+#     "company_name": "AF Furnishings",
+#     "tagline": "Comfort made for everyday living.",
+#     "description": "AF Furnishings provides quality furniture...",
+#     "address": "Auckland, New Zealand",
+#     "phone": "12345667890",
+#     "email": "affurniture@gmail.com"
+#   }
+
+
+# ---- PUT /api/about ----
+# Update company information. REQUIRES AUTHENTICATION.
+#
+# Request Body:
+#   {
+#     "company_name": "AF Furnishings",
+#     "tagline": "Your new tagline",
+#     "description": "Updated description...",
+#     "address": "New Address",
+#     "phone": "1234567890",
+#     "email": "new@email.com"
+#   }
+#
+# Response (200):
+#   { "message": "About info updated" }
+
+
+# ============================================================
+# 5. TERMS & CONDITIONS ROUTES
+# ============================================================
+
+# ---- GET /api/terms ----
+# Get the Terms & Conditions content.
+# PUBLIC
+#
+# Response (200):
+#   {
+#     "id": 1,
+#     "content": "Terms & Conditions\n\n1. General\nThese terms...",
+#     "updated_at": "2026-08-21T00:00:00.000Z"
+#   }
+
+
+# ---- PUT /api/terms ----
+# Update Terms & Conditions content. REQUIRES AUTHENTICATION.
+#
+# Request Body:
+#   { "content": "Your full terms and conditions text here..." }
+#
+# Response (200):
+#   { "message": "Terms & Conditions updated" }
+
+
+# ============================================================
+# 6. ENQUIRY ROUTES
+# ============================================================
+
+# ---- GET /api/enquiries ----
+# List all enquiries. REQUIRES AUTHENTICATION.
+#
+# Query Parameters (optional):
+#   ?type=product    - Filter by type (product or contact)
+#   ?status=pending  - Filter by status (pending, replied, closed)
+#
+# Response (200):
+#   [
+#     {
+#       "id": 1,
+#       "name": "John Smith",
+#       "email": "john@example.com",
+#       "phone": "1234567890",
+#       "product_id": 1,
+#       "product_name": "Marina Lounge Chair",
+#       "message": "Is this available in walnut finish?",
+#       "status": "pending",
+#       "type": "product",
+#       "created_at": "2026-08-21T00:00:00.000Z"
+#     },
+#     ...
+#   ]
+
+
+# ---- POST /api/enquiries ----
+# Submit a new enquiry. PUBLIC (no authentication needed).
+# Used by the website's "Add to enquiry" button and Contact form.
+#
+# Request Body:
+#   {
+#     "name": "John Smith",
+#     "email": "john@example.com",
+#     "phone": "1234567890",          (optional)
+#     "product_id": 1,                (optional - for product enquiries)
+#     "product_name": "Marina Lounge Chair", (optional)
+#     "message": "Is this available in walnut finish?", (optional)
+#     "type": "product"               (or "contact" for contact form)
+#   }
+#
+# Response (201):
+#   { "message": "Enquiry submitted successfully", "id": 1 }
+
+
+# ---- PUT /api/enquiries/:id/status ----
+# Update an enquiry's status. REQUIRES AUTHENTICATION.
+#
+# Request Body:
+#   { "status": "replied" }   (pending, replied, or closed)
+#
+# Response (200):
+#   { "message": "Status updated" }
+
+
+# ---- DELETE /api/enquiries/:id ----
+# Delete an enquiry. REQUIRES AUTHENTICATION.
+#
+# Response (200):
+#   { "message": "Enquiry deleted" }
+
+
+# ============================================================
+# 7. DASHBOARD ROUTES
+# ============================================================
+
+# ---- GET /api/dashboard ----
+# Get dashboard statistics and recent enquiries.
+# REQUIRES AUTHENTICATION
+#
+# Headers:
+#   Authorization: Bearer <token>
+#
+# Response (200):
+#   {
+#     "stats": {
+#       "totalCategories": 5,
+#       "totalProducts": 12,
+#       "totalEnquiries": 3,
+#       "inStockProducts": 10,
+#       "outOfStockProducts": 2,
+#       "contactEnquiries": 1
+#     },
+#     "recentEnquiries": [
+#       { "id": 1, "name": "John", "email": "john@example.com", ... },
+#       ...
+#     ]
+#   }
+
+
+# ============================================================
+# 8. HEALTH CHECK
+# ============================================================
+
+# ---- GET /api/health ----
+# Simple health check endpoint. PUBLIC.
+#
+# Response (200):
+#   { "status": "ok", "timestamp": "2026-08-21T12:00:00.000Z" }
+
+
+# ============================================================
+# QUICK START GUIDE
+# ============================================================
+#
+# 1. Install MySQL and create the database:
+#    mysql -u root -e "CREATE DATABASE af_furniture"
+#
+# 2. Install backend dependencies:
+#    cd backend && npm install
+#
+# 3. Run database migrations:
+#    npm run migrate
+#
+# 4. Seed the database with default data:
+#    npm run seed
+#
+# 5. Start the backend server:
+#    npm run dev
+#    (Server runs on http://localhost:5000)
+#
+# 6. In a new terminal, start the admin panel:
+#    cd ../admin-panel && npm install && npm run dev
+#    (Admin panel runs on http://localhost:5173)
+#
+# 7. In another terminal, start the website:
+#    cd ../website && npm install && npm run dev
+#    (Website runs on http://localhost:5174)
+#
+# 8. Login to admin panel:
+#    Email: admin@gmail.com
+#    Password: admin123
+#
+# The Vite dev server proxies /api requests to the backend,
+# so the frontend can call /api/* directly without CORS issues.
