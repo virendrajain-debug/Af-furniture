@@ -1,22 +1,21 @@
 // ============================================================
 // Dashboard Header Component
 // ============================================================
-// Top header bar with hamburger menu, title, and user actions.
+// Top header bar with hamburger menu, title, and user profile.
 //
 // FEATURES:
 //   - Mobile hamburger menu toggle
 //   - User avatar and email display
 //   - Click avatar to go to Profile page
-//   - Logout button
-//   - Decodes JWT to show user email
+//   - Decodes JWT to dynamically show user email
 // ============================================================
 
 import { useNavigate } from 'react-router-dom'
 
-function Header({ onLogout, onMenuToggle, profileImage, token }) {
+function Header({ onMenuToggle, profileImage, token }) {
   const navigate = useNavigate()
 
-  // Extract email from JWT token payload
+  // Extract email from JWT token payload dynamically
   let userEmail = 'admin@gmail.com'
   try {
     if (token) {
@@ -51,16 +50,6 @@ function Header({ onLogout, onMenuToggle, profileImage, token }) {
           </div>
           <span className="user-email">{userEmail}</span>
         </div>
-
-        {/* Logout button */}
-        <button className="logout-btn" onClick={onLogout}>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4" />
-            <polyline points="16 17 21 12 16 7" />
-            <line x1="21" y1="12" x2="9" y2="12" />
-          </svg>
-          Logout
-        </button>
       </div>
     </header>
   )
