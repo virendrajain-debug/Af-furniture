@@ -13,6 +13,7 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { API_BASE } from '../config'
 
 function OTP() {
   const [otp, setOtp] = useState(['', '', '', '', '', ''])
@@ -68,7 +69,7 @@ function OTP() {
 
     setLoading(true)
     try {
-      const res = await fetch('/api/auth/verify-otp', {
+      const res = await fetch(`${API_BASE}/api/auth/verify-otp`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, otp: code }),

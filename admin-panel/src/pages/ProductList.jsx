@@ -10,6 +10,7 @@
 // ============================================================
 
 import { useState, useEffect } from 'react'
+import { API_BASE } from '../config'
 
 function ProductList({ token }) {
   const [products, setProducts] = useState([])
@@ -24,7 +25,7 @@ function ProductList({ token }) {
   // Fetch all products from API
   const fetchProducts = async () => {
     try {
-      const res = await fetch('/api/products')
+      const res = await fetch(`${API_BASE}/api/products`)
       const data = await res.json()
       setProducts(data)
     } catch {
@@ -39,7 +40,7 @@ function ProductList({ token }) {
   const handleDelete = async (id) => {
     if (!confirm('Are you sure you want to delete this product?')) return
     try {
-      const res = await fetch(`/api/products/${id}`, {
+      const res = await fetch(`${API_BASE}/api/products/${id}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` },
       })

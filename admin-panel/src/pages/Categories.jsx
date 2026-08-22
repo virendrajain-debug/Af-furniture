@@ -12,6 +12,7 @@
 // ============================================================
 
 import { useState, useEffect } from 'react'
+import { API_BASE } from '../config'
 
 function Categories({ token }) {
   const [categories, setCategories] = useState([])
@@ -27,7 +28,7 @@ function Categories({ token }) {
   // Fetch categories from API on component mount
   const fetchCategories = async () => {
     try {
-      const res = await fetch('/api/categories')
+      const res = await fetch(`${API_BASE}/api/categories`)
       const data = await res.json()
       setCategories(data)
     } catch {
@@ -44,7 +45,7 @@ function Categories({ token }) {
     if (!newCat.trim()) return showToast('Enter a category name', 'warning')
 
     try {
-      const res = await fetch('/api/categories', {
+      const res = await fetch(`${API_BASE}/api/categories`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ name: newCat.trim() }),
@@ -66,7 +67,7 @@ function Categories({ token }) {
   // Delete category by ID
   const handleDelete = async (id) => {
     try {
-      const res = await fetch(`/api/categories/${id}`, {
+      const res = await fetch(`${API_BASE}/api/categories/${id}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` },
       })

@@ -10,6 +10,7 @@
 // ============================================================
 
 import { useEffect, useState } from 'react'
+import { API_BASE } from '../config'
 
 function Overview({ token }) {
   const [stats, setStats] = useState(null)
@@ -19,7 +20,7 @@ function Overview({ token }) {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const res = await fetch('/api/dashboard', {
+        const res = await fetch(`${API_BASE}/api/dashboard`, {
           headers: { Authorization: `Bearer ${token}` },
         })
         const data = await res.json()

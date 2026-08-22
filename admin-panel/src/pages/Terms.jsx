@@ -14,6 +14,7 @@
 // ============================================================
 
 import { useState, useEffect, useRef } from 'react'
+import { API_BASE } from '../config'
 
 function Terms({ token }) {
   const [content, setContent] = useState('')
@@ -28,7 +29,7 @@ function Terms({ token }) {
 
   // Fetch terms content on mount
   useEffect(() => {
-    fetch('/api/terms')
+    fetch(`${API_BASE}/api/terms`)
       .then(r => r.json())
       .then(data => { if (data.content) setContent(data.content) })
       .catch(() => {})
@@ -38,7 +39,7 @@ function Terms({ token }) {
   // Save terms to API
   const handleSave = async () => {
     try {
-      const res = await fetch('/api/terms', {
+      const res = await fetch(`${API_BASE}/api/terms`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ content }),

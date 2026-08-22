@@ -12,6 +12,7 @@
 // ============================================================
 
 import { useState, useEffect } from 'react'
+import { API_BASE } from '../config'
 
 function About({ token }) {
   const [company, setCompany] = useState({
@@ -32,7 +33,7 @@ function About({ token }) {
 
   // Fetch about info on mount
   useEffect(() => {
-    fetch('/api/about')
+    fetch(`${API_BASE}/api/about`)
       .then(r => r.json())
       .then(data => {
         if (data.company_name) setCompany(data)
@@ -48,7 +49,7 @@ function About({ token }) {
   // Save about info to API
   const handleSave = async () => {
     try {
-      const res = await fetch('/api/about', {
+      const res = await fetch(`${API_BASE}/api/about`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify(company),

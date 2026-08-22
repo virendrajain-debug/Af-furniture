@@ -1,88 +1,150 @@
-// ============================================================
-// Header / Navigation Component
-// ============================================================
-// Sticky header with logo, navigation links, search bar, and social icons.
-//
-// FEATURES:
-//   - Mobile hamburger menu toggle
-//   - Smooth scroll navigation (anchor links)
-//   - Search form (scrolls to products section)
-//   - Instagram/Facebook social links
-//   - Sticky positioning (stays at top on scroll)
-//
-// NAVIGATION LINKS:
-//   Home, Lounge, Bedroom, Winz (was Sofas), Dining,
-//   Living, About, Contact, Terms, On Sale!
-// ============================================================
+import { useState, useEffect } from 'react'
+import { Link } from 'react-router-dom'
 
-import { useState } from 'react'
+const navCategories = [
+  {
+    label: 'Bedroom',
+    href: '#bedroom',
+    subcategories: [
+      { label: 'All Bedroom', href: '#bedroom' },
+      { label: 'Bed Frames', href: '#bedroom' },
+      { label: 'Mattresses', href: '#bedroom' },
+      { label: 'Bedroom Sets', href: '#bedroom' },
+    ],
+  },
+  {
+    label: 'Dining',
+    href: '#dining',
+    subcategories: [
+      { label: 'All Dining', href: '#dining' },
+      { label: 'Dining Suites', href: '#dining' },
+      { label: 'Dining Tables', href: '#dining' },
+      { label: 'Dining Chairs', href: '#dining' },
+    ],
+  },
+  {
+    label: 'Living',
+    href: '#living',
+    subcategories: [
+      { label: 'All Living', href: '#living' },
+      { label: 'Coffee Tables', href: '#living' },
+      { label: 'Console Tables', href: '#living' },
+      { label: 'Bar Stools', href: '#living' },
+    ],
+  },
+]
 
 function Header() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
+  const [hoveredMenu, setHoveredMenu] = useState(null)
+  const [scrolled, setScrolled] = useState(false)
 
-  // Handle search form submission - scroll to products
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 60)
+    window.addEventListener('scroll', onScroll, { passive: true })
+    onScroll()
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
+
   const handleSearch = (e) => {
     e.preventDefault()
     if (searchQuery.trim()) {
-      const el = document.getElementById('winz')
+      const el = document.getElementById('sofas')
       if (el) el.scrollIntoView({ behavior: 'smooth' })
     }
   }
 
+  const handleNavClick = (href) => {
+    setMenuOpen(false)
+    setHoveredMenu(null)
+    const el = document.querySelector(href)
+    if (el) el.scrollIntoView({ behavior: 'smooth' })
+  }
+
   return (
-    <header className="site-header">
-      <a className="logo" href="#home">
-        <img src="/logo.png" alt="AF Furnishings" />
-      </a>
-
-      {/* Mobile hamburger button */}
-      <button className="nav-toggle" onClick={() => setMenuOpen(!menuOpen)} aria-label="Open menu">
-        &#9776;
-      </button>
-
-      {/* Navigation links */}
-      <nav className={menuOpen ? 'open' : ''}>
-        <a href="#home" onClick={() => setMenuOpen(false)}>Home</a>
-        <a href="#lounge" onClick={() => setMenuOpen(false)}>Lounge</a>
-        <a href="#bedroom" onClick={() => setMenuOpen(false)}>Bedroom</a>
-        <a href="#winz" onClick={() => setMenuOpen(false)}>Winz</a>
-        <a href="#dining" onClick={() => setMenuOpen(false)}>Dining</a>
-        <a href="#living" onClick={() => setMenuOpen(false)}>Living</a>
-        <a href="#about" onClick={() => setMenuOpen(false)}>About</a>
-        <a href="#contact" onClick={() => setMenuOpen(false)}>Contact</a>
-        <a href="#terms" onClick={() => setMenuOpen(false)}>Terms</a>
-        <a className="sale-link" href="#deals" onClick={() => setMenuOpen(false)}>On Sale!</a>
-      </nav>
-
-      {/* Search bar and social icons */}
-      <div className="header-tools">
-        <form className="header-search" role="search" onSubmit={handleSearch}>
-          <input
-            type="search"
-            aria-label="Search products"
-            placeholder="Search furniture..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-          <button aria-label="Search" type="submit">&#8981;</button>
-        </form>
-        <div className="header-social">
-          <a href="https://www.instagram.com/" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
-              <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
-              <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/>
-            </svg>
-          </a>
-          <a href="https://www.facebook.com/" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>
-            </svg>
-          </a>
-        </div>
+    <>
+      <div className="announcement-bar">
+        Welcome to AF Furnishings <span>&#8226;</span> Quality pieces for every home
       </div>
-    </header>
+      <header className={`site-header${scrolled ? ' scrolled' : ''}`}>
+        <Link className="logo" to="/">
+          <img src="/logo.png" alt="AF Furnishings" />
+        </Link>
+        <button className="nav-toggle" onClick={() => setMenuOpen(!menuOpen)} aria-label="Open menu">
+          &#9776;
+        </button>
+        <nav className={menuOpen ? 'open' : ''}>
+          <a href="#home" onClick={() => handleNavClick('#home')}>Home</a>
+
+          {navCategories.map((cat) => (
+            <div
+              key={cat.label}
+              className="nav-dropdown"
+              onMouseEnter={() => setHoveredMenu(cat.label)}
+              onMouseLeave={() => setHoveredMenu(null)}
+            >
+              <a
+                href={cat.href}
+                onClick={(e) => { e.preventDefault(); handleNavClick(cat.href) }}
+              >
+                {cat.label} <span className="dropdown-arrow">&#9662;</span>
+              </a>
+              {hoveredMenu === cat.label && (
+                <div className="dropdown-menu">
+                  {cat.subcategories.map((sub) => (
+                    <a
+                      key={sub.label}
+                      href={sub.href}
+                      onClick={(e) => { e.preventDefault(); handleNavClick(sub.href) }}
+                    >
+                      {sub.label}
+                    </a>
+                  ))}
+                </div>
+              )}
+            </div>
+          ))}
+
+          <Link to="/winz">WinZ</Link>
+          <a className="sale-link" href="#deals" onClick={() => handleNavClick('#deals')}>On Sale!</a>
+        </nav>
+        <div className="header-tools">
+          <a href="#deals" className="btn-finance" onClick={(e) => { e.preventDefault(); handleNavClick('#deals') }}>Apply for finance</a>
+          <form className="header-search" role="search" onSubmit={handleSearch}>
+            <input
+              type="search"
+              aria-label="Search products"
+              placeholder="Search Here..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+            <button aria-label="Search" type="submit">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="11" cy="11" r="8"/>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              </svg>
+            </button>
+          </form>
+          <div className="header-icons">
+            <a href="#" className="header-icon" aria-label="Account">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                <circle cx="12" cy="7" r="4"/>
+              </svg>
+            </a>
+            <a href="#" className="header-icon" aria-label="Cart">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="9" cy="21" r="1"/>
+                <circle cx="20" cy="21" r="1"/>
+                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+              </svg>
+            </a>
+          </div>
+        </div>
+      </header>
+      <a href="#deals" className="aff-bottom" onClick={(e) => { e.preventDefault(); handleNavClick('#deals') }}>APPLY FOR FINANCE</a>
+    </>
   )
 }
 

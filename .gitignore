@@ -8,3 +8,7 @@ logs/
 .idea/
 .vscode/
 *.sw?
+data.db
+data.db-shm
+data.db-wal
+*.zip
