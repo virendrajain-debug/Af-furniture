@@ -11,15 +11,22 @@
 //   - Numeric-only validation
 // ============================================================
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 
-function OTP({ onResetComplete }) {
+function OTP() {
   const [otp, setOtp] = useState(['', '', '', '', '', ''])
   const [loading, setLoading] = useState(false)
   const [toast, setToast] = useState(null)
   const inputRefs = useRef([])
   const navigate = useNavigate()
+
+  const email = localStorage.getItem('af_reset_email')
+
+  // Kick back to forgot-password if no email is found
+  useEffect(() => {
+    if (!email) navigate('/forgot-password')
+  }, [email, navigate])
 
   const showToast = (msg, type) => {
     setToast({ msg, type })
@@ -59,7 +66,6 @@ function OTP({ onResetComplete }) {
     const code = otp.join('')
     if (code.length !== 6) return showToast('Please enter complete OTP', 'warning')
 
-    const email = localStorage.getItem('af_reset_email')
     setLoading(true)
     try {
       const res = await fetch('/api/auth/verify-otp', {
@@ -70,10 +76,11 @@ function OTP({ onResetComplete }) {
       const data = await res.json()
 
       if (res.ok) {
-        showToast('OTP verified! You can now reset your password.', 'success')
+        showToast('OTP verified! Redirecting...', 'success')
+        // Save the reset token for the final step
         localStorage.setItem('af_reset_token', data.resetToken)
-        onResetComplete()
-        setTimeout(() => navigate('/'), 800)
+        // Fix: Navigate to the new password page instead of home!
+        setTimeout(() => navigate('/new-password'), 800)
       } else {
         showToast(data.message || 'Invalid OTP', 'error')
       }
@@ -90,7 +97,7 @@ function OTP({ onResetComplete }) {
       <div className="login-card">
         <img src="/aeryp.png" alt="AF Furniture" className="logo" />
         <h2>Verify OTP</h2>
-        <p className="subtitle">Enter the 6-digit code sent to your email</p>
+        <p className="subtitle">Enter the 6-digit code sent to {email}</p>
 
         <form onSubmit={handleVerify}>
           <div className="otp-inputs">
@@ -116,7 +123,7 @@ function OTP({ onResetComplete }) {
         </form>
 
         <button type="button" className="back-link" onClick={() => navigate('/forgot-password')}>
-          Resend OTP
+          Change Email
         </button>
       </div>
     </div>

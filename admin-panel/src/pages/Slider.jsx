@@ -41,7 +41,7 @@ function Slider() {
 
       <div className="section-header" style={{ display: 'flex', justifyContent: 'space-between' }}>
         <div><h2>Slider (Banner)</h2><p>Manage homepage banners</p></div>
-        <button className="btn-primary" onClick={() => openModal()}>+ Add Banner</button>
+        <button className="btn-primary" onClick={() => openModal()} style={{ color: '#fff', fontWeight: 'bold' }}>+ Add Banner</button>
       </div>
 
       <table style={{ width: '100%', textAlign: 'left', marginTop: '20px', borderCollapse: 'collapse' }}>
@@ -61,7 +61,7 @@ function Slider() {
                   <div style={{ width: '16px', height: '16px', background: '#fff', borderRadius: '50%', position: 'absolute', top: '2px', left: s.isActive ? '22px' : '2px', transition: '0.2s' }} />
                 </div>
               </td>
-              <td style={{ color: s.isActive ? '#10B981' : '#888' }}>{s.isActive ? 'Active' : 'Inactive'}</td>
+              <td style={{ color: s.isActive ? '#10B981' : '#888', fontWeight: '500' }}>{s.isActive ? 'Active' : 'Inactive'}</td>
               <td>
                 <button className="btn-icon" onClick={() => openModal(s)} style={{ marginRight: '10px' }}>Edit</button>
                 <button className="btn-icon" onClick={() => setSliders(sliders.filter(item => item.id !== s.id))} style={{ color: 'red' }}>Delete</button>
@@ -72,24 +72,39 @@ function Slider() {
       </table>
 
       {modal && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
-          <div style={{ background: '#fff', padding: '24px', borderRadius: '8px', width: '350px' }}>
-            <h3>{form.id ? 'Edit Banner' : 'Add New Banner'}</h3>
-            <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: '15px', marginTop: '15px' }}>
-              <input type="text" placeholder="Banner Name" value={form.title} onChange={e => setForm({...form, title: e.target.value})} style={{ padding: '8px', width: '100%' }} />
-              <input type="file" accept="image/*" onChange={e => e.target.files[0] && setForm({...form, image: URL.createObjectURL(e.target.files[0])})} />
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
+          <div style={{ background: '#fff', padding: '30px', borderRadius: '12px', width: '400px', boxShadow: '0 10px 25px rgba(0,0,0,0.1)' }}>
+            <h3 style={{ marginBottom: '20px', fontSize: '1.2rem', color: '#333' }}>{form.id ? 'Edit Banner' : 'Add New Banner'}</h3>
+            
+            <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
               
-
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }} onClick={() => setForm({...form, isActive: !form.isActive})}>
-                <div style={{ width: '40px', height: '20px', background: form.isActive ? '#10B981' : '#ccc', borderRadius: '10px', position: 'relative' }}>
-                  <div style={{ width: '16px', height: '16px', background: '#fff', borderRadius: '50%', position: 'absolute', top: '2px', left: form.isActive ? '22px' : '2px', transition: '0.2s' }} />
-                </div>
-                <span>Set as Active</span>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.9rem', marginBottom: '6px', color: '#555' }}>Banner Name</label>
+                <input type="text" placeholder="Enter banner name" value={form.title} onChange={e => setForm({...form, title: e.target.value})} style={{ padding: '12px', width: '100%', borderRadius: '6px', border: '1px solid #ddd', outline: 'none' }} />
               </div>
 
-              <div style={{ display: 'flex', gap: '10px' }}>
-                <button type="button" onClick={() => setModal(false)} style={{ flex: 1, padding: '8px' }}>Cancel</button>
-                <button type="submit" className="btn-primary" style={{ flex: 1, padding: '8px' }}>Save</button>
+              {/* Styled File Upload */}
+              <div>
+                <label style={{ display: 'block', fontSize: '0.9rem', marginBottom: '6px', color: '#555' }}>Upload Image</label>
+                <label style={{ display: 'block', background: '#3B82F6', color: '#fff', padding: '12px', borderRadius: '6px', textAlign: 'center', cursor: 'pointer', fontWeight: 'bold', transition: '0.2s' }}>
+                  {form.image ? 'Change Image' : 'Choose File'}
+                  <input type="file" accept="image/*" onChange={e => e.target.files[0] && setForm({...form, image: URL.createObjectURL(e.target.files[0])})} style={{ display: 'none' }} />
+                </label>
+                {form.image && (
+                  <img src={form.image} alt="preview" style={{ width: '100%', height: '140px', objectFit: 'cover', borderRadius: '6px', marginTop: '12px', border: '1px solid #eee' }} />
+                )}
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer', padding: '10px 0' }} onClick={() => setForm({...form, isActive: !form.isActive})}>
+                <div style={{ width: '44px', height: '24px', background: form.isActive ? '#10B981' : '#cbd5e1', borderRadius: '12px', position: 'relative', transition: '0.3s' }}>
+                  <div style={{ width: '18px', height: '18px', background: '#fff', borderRadius: '50%', position: 'absolute', top: '3px', left: form.isActive ? '23px' : '3px', transition: '0.3s', boxShadow: '0 2px 4px rgba(0,0,0,0.2)' }} />
+                </div>
+                <span style={{ fontWeight: '500', color: '#333' }}>Set as Active Banner</span>
+              </div>
+
+              <div style={{ display: 'flex', gap: '12px', marginTop: '10px' }}>
+                <button type="button" onClick={() => setModal(false)} style={{ flex: 1, padding: '12px', background: '#64748b', color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold', fontSize: '1rem' }}>Cancel</button>
+                <button type="submit" style={{ flex: 1, padding: '12px', background: '#10B981', color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold', fontSize: '1rem' }}>Save Banner</button>
               </div>
             </form>
           </div>

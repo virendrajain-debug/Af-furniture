@@ -1,7 +1,7 @@
 // ============================================================
 // Profile Page Component
 // ============================================================
-// Admin profile management - name, email, photo, password.
+// Admin profile management - name, email, photo, password, social links.
 //
 // API CALLS:
 //   GET  /api/auth/profile        - Fetch current profile
@@ -11,6 +11,7 @@
 // FEATURES:
 //   - Profile photo upload (stored as base64 in localStorage + API)
 //   - Name/email editing
+//   - Social Media Links (Instagram, Facebook, LinkedIn)
 //   - Password change with current password verification
 // ============================================================
 
@@ -19,6 +20,12 @@ import { useState, useEffect } from 'react'
 function Profile({ profileImage, onProfileImageChange, token }) {
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
+  
+  // NEW: Social Media States
+  const [instagram, setInstagram] = useState('')
+  const [facebook, setFacebook] = useState('')
+  const [linkedin, setLinkedin] = useState('')
+
   const [currentPass, setCurrentPass] = useState('')
   const [newPass, setNewPass] = useState('')
   const [confirmPass, setConfirmPass] = useState('')
@@ -43,6 +50,10 @@ function Profile({ profileImage, onProfileImageChange, token }) {
         if (data.name) setName(data.name)
         if (data.email) setEmail(data.email)
         if (data.profile_image) onProfileImageChange(data.profile_image)
+        // NEW: Load social links if they exist
+        if (data.instagram) setInstagram(data.instagram)
+        if (data.facebook) setFacebook(data.facebook)
+        if (data.linkedin) setLinkedin(data.linkedin)
       })
       .catch(() => {})
       .finally(() => setLoading(false))
@@ -55,7 +66,15 @@ function Profile({ profileImage, onProfileImageChange, token }) {
       const res = await fetch('/api/auth/profile', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ name, email, profile_image: profileImage }),
+        // NEW: Included social links in the API request
+        body: JSON.stringify({ 
+          name, 
+          email, 
+          profile_image: profileImage,
+          instagram,
+          facebook,
+          linkedin
+        }),
       })
       if (res.ok) {
         showToast('Profile updated successfully!', 'success')
@@ -176,10 +195,28 @@ function Profile({ profileImage, onProfileImageChange, token }) {
               <label>Full Name</label>
               <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="Enter your name" disabled={loading} />
             </div>
+            
             <div className="input-group">
               <label>Email Address</label>
               <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Enter your email" disabled={loading} />
             </div>
+
+            {/* NEW: Social Media Input Boxes */}
+            <div className="input-group">
+              <label>Instagram Link</label>
+              <input type="url" value={instagram} onChange={(e) => setInstagram(e.target.value)} placeholder="https://instagram.com/..." disabled={loading} />
+            </div>
+
+            <div className="input-group">
+              <label>Facebook Link</label>
+              <input type="url" value={facebook} onChange={(e) => setFacebook(e.target.value)} placeholder="https://facebook.com/..." disabled={loading} />
+            </div>
+
+            <div className="input-group">
+              <label>LinkedIn Link</label>
+              <input type="url" value={linkedin} onChange={(e) => setLinkedin(e.target.value)} placeholder="https://linkedin.com/in/..." disabled={loading} />
+            </div>
+
             <button type="submit" className="btn-primary" disabled={loading}>Save Changes</button>
           </form>
         </div>
