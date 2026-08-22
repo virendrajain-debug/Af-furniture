@@ -8,6 +8,7 @@
 // ============================================================
 
 import { useState } from 'react'
+import { API_BASE } from '../config'
 
 function ContactSection() {
   const [form, setForm] = useState({ name: '', email: '', phone: '', message: '' })
@@ -33,7 +34,7 @@ function ContactSection() {
 
     setSubmitting(true)
     try {
-      const res = await fetch('/api/enquiries', {
+      const res = await fetch(`${API_BASE}/api/enquiries`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...form, type: 'contact' }),

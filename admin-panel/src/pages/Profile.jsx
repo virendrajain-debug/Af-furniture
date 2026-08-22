@@ -15,6 +15,7 @@
 // ============================================================
 
 import { useState, useEffect } from 'react'
+import { API_BASE } from '../config'
 
 function Profile({ profileImage, onProfileImageChange, token }) {
   const [name, setName] = useState('')
@@ -35,7 +36,7 @@ function Profile({ profileImage, onProfileImageChange, token }) {
 
   // Fetch profile data on mount
   useEffect(() => {
-    fetch('/api/auth/profile', {
+    fetch(`${API_BASE}/api/auth/profile`, {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then(r => r.json())
@@ -52,7 +53,7 @@ function Profile({ profileImage, onProfileImageChange, token }) {
   const handleSave = async (e) => {
     e.preventDefault()
     try {
-      const res = await fetch('/api/auth/profile', {
+      const res = await fetch(`${API_BASE}/api/auth/profile`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ name, email, profile_image: profileImage }),
@@ -79,7 +80,7 @@ function Profile({ profileImage, onProfileImageChange, token }) {
       return
     }
     try {
-      const res = await fetch('/api/auth/change-password', {
+      const res = await fetch(`${API_BASE}/api/auth/change-password`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ currentPassword: currentPass, newPassword: newPass }),

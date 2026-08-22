@@ -13,6 +13,7 @@
 // ============================================================
 
 import { useState, useEffect } from 'react'
+import { API_BASE } from '../config'
 
 function AddProduct({ token }) {
   // Form state - all product fields
@@ -34,7 +35,7 @@ function AddProduct({ token }) {
 
   // Load categories for the dropdown
   useEffect(() => {
-    fetch('/api/categories')
+    fetch(`${API_BASE}/api/categories`)
       .then(r => r.json())
       .then(setCategories)
       .catch(() => {})
@@ -86,7 +87,7 @@ function AddProduct({ token }) {
         formData.append('images', img.file)
       })
 
-      const res = await fetch('/api/products', {
+      const res = await fetch(`${API_BASE}/api/products`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` },
         body: formData,

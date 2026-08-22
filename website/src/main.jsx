@@ -1,20 +1,8 @@
-// ============================================================
-// AF Furnishings - Main Entry Point
-// ============================================================
-// Initializes the React app and sets up:
-//   - Custom cursor (outer ring + inner dot)
-//   - Scroll-based fade-in animations (IntersectionObserver)
-//   - Hover effects for interactive elements
-// ============================================================
-
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.jsx'
 
-// ---- Custom Cursor Setup ----
-// Creates two DOM elements: an outer ring and an inner dot
-// They follow the mouse with slight delay for smooth feel
 const cursor = document.createElement('div')
 cursor.className = 'custom-cursor'
 document.body.appendChild(cursor)
@@ -23,7 +11,6 @@ const cursorDot = document.createElement('div')
 cursorDot.className = 'custom-cursor-dot'
 document.body.appendChild(cursorDot)
 
-// Track mouse position and update cursor elements
 document.addEventListener('mousemove', (e) => {
   cursor.style.left = e.clientX + 'px'
   cursor.style.top = e.clientY + 'px'
@@ -31,7 +18,6 @@ document.addEventListener('mousemove', (e) => {
   cursorDot.style.top = e.clientY + 'px'
 })
 
-// Add hover effect when mouse is over clickable elements
 document.addEventListener('mouseover', (e) => {
   if (e.target.closest('a, button, input, textarea, select, .product-card, .primary, label')) {
     cursor.classList.add('hovering')
@@ -39,7 +25,6 @@ document.addEventListener('mouseover', (e) => {
   }
 })
 
-// Remove hover effect when mouse leaves clickable elements
 document.addEventListener('mouseout', (e) => {
   if (e.target.closest('a, button, input, textarea, select, .product-card, .primary, label')) {
     cursor.classList.remove('hovering')
@@ -47,34 +32,36 @@ document.addEventListener('mouseout', (e) => {
   }
 })
 
-// Click animation
 document.addEventListener('mousedown', () => cursor.classList.add('clicked'))
 document.addEventListener('mouseup', () => cursor.classList.remove('clicked'))
 
-// ---- Scroll Animation Observer ----
-// Watches for elements with animation classes and adds 'visible' when in viewport
 const observerOptions = {
-  threshold: 0.1,   // Trigger when 10% visible
-  rootMargin: '0px 0px -50px 0px' // Slightly before entering viewport
+  threshold: 0.1,
+  rootMargin: '0px 0px -50px 0px'
 }
 
 const observer = new IntersectionObserver((entries) => {
   entries.forEach(entry => {
     if (entry.isIntersecting) {
       entry.target.classList.add('visible')
-      observer.unobserve(entry.target) // Only animate once
+      observer.unobserve(entry.target)
     }
   })
 }, observerOptions)
 
-// Observe all elements with animation classes after DOM loads
-setTimeout(() => {
-  document.querySelectorAll('.fade-in, .fade-in-left, .fade-in-right, .scale-in').forEach(el => {
+function observeFadeIns() {
+  document.querySelectorAll('.fade-in:not(.visible), .fade-in-left:not(.visible), .fade-in-right:not(.visible), .scale-in:not(.visible)').forEach(el => {
     observer.observe(el)
   })
-}, 100)
+}
 
-// ---- Render the React App ----
+observeFadeIns()
+
+const mutationObserver = new MutationObserver(() => {
+  observeFadeIns()
+})
+mutationObserver.observe(document.body, { childList: true, subtree: true })
+
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <App />

@@ -1,14 +1,7 @@
-// ============================================================
-// Testimonials Section Component
-// ============================================================
-// Three customer testimonials with scroll-triggered animations.
-// Each card has a staggered fade-in animation on scroll.
-// ============================================================
-
 const testimonials = [
-  { text: '"The sofa is beautiful and the process was so easy. It has made our lounge our favourite room."', author: '— Mele T.' },
-  { text: '"Friendly service, great quality, and our new bedroom set looks wonderful."', author: '— Kiri R.' },
-  { text: '"We found everything for our dining space in one place. Highly recommended."', author: '— Ana S.' },
+  { text: 'The sofa is beautiful and the process was so easy. It has made our lounge our favourite room. The quality is outstanding and the weekly payments make it so affordable.', author: 'Mele T.', location: 'Auckland' },
+  { text: 'Friendly service, great quality, and our new bedroom set looks wonderful. We shopped around but AF Furnishings had the best range and the staff were incredibly helpful.', author: 'Kiri R.', location: 'Wellington' },
+  { text: 'We found everything for our dining space in one place. Highly recommended. The delivery was fast and the team even helped us set up the table.', author: 'Ana S.', location: 'Hamilton' },
 ]
 
 function Testimonials() {
@@ -20,9 +13,16 @@ function Testimonials() {
       </div>
       <div className="testimonial-grid">
         {testimonials.map((t, i) => (
-          <blockquote key={i} className={`fade-in stagger-${i + 1}`}>
-            {t.text}
-            <cite>{t.author}</cite>
+          <blockquote key={i} className="testimonial-card fade-in">
+            <div className="testimonial-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+            <p>&ldquo;{t.text}&rdquo;</p>
+            <div className="testimonial-author">
+              <div className="testimonial-avatar">{t.author.charAt(0)}</div>
+              <div>
+                <cite>&mdash; {t.author}</cite>
+                <span className="testimonial-location">{t.location}</span>
+              </div>
+            </div>
           </blockquote>
         ))}
       </div>

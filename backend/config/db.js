@@ -1,31 +1,58 @@
-// ============================================================
-// Database Configuration - MySQL Connection Pool
-// ============================================================
-// This file creates a connection pool to MySQL database.
-// A pool manages multiple connections efficiently instead of
-// creating a new connection for every query.
-//
-// The pool is exported and used by all route files to run queries.
-// ============================================================
+import initSqlJs from 'sql.js';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
-import mysql from 'mysql2/promise'; // MySQL driver with Promise support
-import dotenv from 'dotenv';         // Load .env variables
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const DB_PATH = path.join(__dirname, '..', 'data.db');
 
-dotenv.config(); // Load DATABASE_HOST, DATABASE_USER, etc. from .env
+let db;
 
-// Create a connection pool with configuration from .env
-const pool = mysql.createPool({
-  host: process.env.DB_HOST,      // e.g., 'localhost'
-  user: process.env.DB_USER,      // e.g., 'root'
-  password: process.env.DB_PASSWORD, // e.g., '' (empty for local MySQL)
-  database: process.env.DB_NAME,  // e.g., 'af_furniture'
-  waitForConnections: true,       // Wait for available connection if pool is empty
-  connectionLimit: 10,            // Max 10 simultaneous connections
-  queueLimit: 0,                  // Unlimited queue (wait for connections)
-});
+function save() {
+  const data = db.export();
+  fs.writeFileSync(DB_PATH, Buffer.from(data));
+}
 
-// Export the pool so other files can use it
-// Usage in routes:
-//   import pool from '../config/db.js';
-//   const [rows] = await pool.execute('SELECT * FROM products');
+const pool = {
+  execute(sql, params = []) {
+    const trimmed = sql.trim().replace(/\/\*[\s\S]*?\*\//g, '').trim();
+    const upper = trimmed.toUpperCase();
+
+    if (upper.startsWith('SELECT') || upper.startsWith('SHOW') || upper.startsWith('PRAGMA')) {
+      const stmt = db.prepare(trimmed);
+      if (params.length > 0) stmt.bind(params);
+      const rows = [];
+      while (stmt.step()) {
+        rows.push(stmt.getAsObject());
+      }
+      stmt.free();
+      return [rows, []];
+    }
+
+    if (upper.startsWith('INSERT')) {
+      db.run(trimmed, params);
+      const id = db.exec('SELECT last_insert_rowid() as id')[0]?.values[0][0] || 0;
+      save();
+      return [{ insertId: Number(id), affectedRows: db.getRowsModified() }, []];
+    }
+
+    db.run(trimmed, params);
+    save();
+    return [{ affectedRows: db.getRowsModified() }, []];
+  }
+};
+
+const SQL = await initSqlJs();
+
+if (fs.existsSync(DB_PATH)) {
+  const buffer = fs.readFileSync(DB_PATH);
+  db = new SQL.Database(buffer);
+} else {
+  db = new SQL.Database();
+}
+
+db.run('PRAGMA journal_mode = WAL');
+db.run('PRAGMA foreign_keys = ON');
+
 export default pool;

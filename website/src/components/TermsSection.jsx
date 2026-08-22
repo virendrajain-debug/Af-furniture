@@ -6,12 +6,13 @@
 // ============================================================
 
 import { useState, useEffect } from 'react'
+import { API_BASE } from '../config'
 
 function TermsSection() {
   const [terms, setTerms] = useState(null)
 
   useEffect(() => {
-    fetch('/api/terms')
+    fetch(`${API_BASE}/api/terms`)
       .then(r => r.json())
       .then(setTerms)
       .catch(() => {})

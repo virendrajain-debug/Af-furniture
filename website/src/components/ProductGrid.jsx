@@ -1,159 +1,108 @@
-// ============================================================
-// Product Grid Component
-// ============================================================
-// Displays a grid of products fetched from the API.
-// Falls back to default Unsplash images if no products in DB.
-//
-// PROPS:
-//   sectionId  - HTML anchor ID
-//   label      - Section label text (e.g., "WINZ COLLECTION")
-//   title      - Section heading
-//   productsKey - Fallback product key
-//   category   - Category name to filter products from API
-//   compact    - If true, uses smaller padding
-//
-// FEATURES:
-//   - Fetches products from GET /api/products?category=X
-//   - "Add to enquiry" button opens a modal
-//   - Enquiry form submits to POST /api/enquiries
-//   - Toast notifications for success/error
-// ============================================================
+import { useState, useEffect, useRef } from 'react'
+import { API_BASE } from '../config'
 
-import { useState, useEffect } from 'react'
+const defaultProducts = [
+  { id: 1, name: 'Marina Lounge Chair', mrp: 1299, selling_price: 1099, images: ['https://images.unsplash.com/photo-1567538096630-e0c55bd6374c?auto=format&fit=crop&w=800&q=80'], material: 'Oak Wood', color: 'Grey' },
+  { id: 2, name: 'Haven Three Seat Sofa', mrp: 2499, selling_price: 2199, images: ['https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=800&q=80'], material: 'Pine Wood', color: 'Green' },
+  { id: 3, name: 'Ember Two Seat Sofa', mrp: 1899, selling_price: 1699, images: ['https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e?auto=format&fit=crop&w=800&q=80'], material: 'Metal Frame', color: 'Charcoal' },
+  { id: 4, name: 'Harbour Corner Sofa', mrp: 3299, selling_price: 2899, images: ['https://images.unsplash.com/photo-1540574163026-643ea20ade25?auto=format&fit=crop&w=800&q=80'], material: 'Oak Wood', color: 'Beige' },
+]
 
-function ProductGrid({ sectionId, label, title, productsKey, category, compact }) {
+function ProductGrid({ sectionId, label, title, category, compact }) {
   const [products, setProducts] = useState([])
-  const [enquiryName, setEnquiryName] = useState('')
-  const [enquiryEmail, setEnquiryEmail] = useState('')
-  const [selectedProduct, setSelectedProduct] = useState(null)
-  const [showEnquiryForm, setShowEnquiryForm] = useState(false)
-  const [toast, setToast] = useState(null)
-  const [submitting, setSubmitting] = useState(false)
+  const [currentSlide, setCurrentSlide] = useState(0)
+  const sliderRef = useRef(null)
+  const [slidesPerView, setSlidesPerView] = useState(4)
 
-  const showToast = (msg, type) => {
-    setToast({ msg, type })
-    setTimeout(() => setToast(null), 3000)
-  }
+  useEffect(() => {
+    const updateSPV = () => setSlidesPerView(window.innerWidth < 768 ? 1 : window.innerWidth < 1024 ? 2 : 4)
+    updateSPV()
+    window.addEventListener('resize', updateSPV)
+    return () => window.removeEventListener('resize', updateSPV)
+  }, [])
 
-  // Fetch products from API by category
   useEffect(() => {
     const fetchProducts = async () => {
       try {
         const url = category
-          ? `/api/products?category=${encodeURIComponent(category)}&limit=4`
-          : `/api/products?limit=4`
+          ? `${API_BASE}/api/products?category=${encodeURIComponent(category)}&limit=8`
+          : `${API_BASE}/api/products?limit=8`
         const res = await fetch(url)
         const data = await res.json()
-        if (data.length > 0) {
-          setProducts(data)
-        }
-      } catch {
-        // Use fallback default products
-      }
+        if (data.length > 0) setProducts(data)
+      } catch {}
     }
     fetchProducts()
   }, [category])
 
-  // Open enquiry modal for a product
-  const handleEnquiryClick = (product) => {
-    setSelectedProduct(product)
-    setShowEnquiryForm(true)
-  }
-
-  // Submit enquiry to API
-  const handleEnquirySubmit = async (e) => {
-    e.preventDefault()
-    if (!enquiryName || !enquiryEmail) {
-      showToast('Please fill in your name and email', 'warning')
-      return
-    }
-
-    setSubmitting(true)
-    try {
-      const res = await fetch('/api/enquiries', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: enquiryName,
-          email: enquiryEmail,
-          product_id: selectedProduct?.id,
-          product_name: selectedProduct?.name,
-          message: `Enquiry about ${selectedProduct?.name}`,
-          type: 'product',
-        }),
-      })
-      if (res.ok) {
-        showToast('Enquiry submitted! We\'ll get back to you soon.', 'success')
-        setShowEnquiryForm(false)
-        setEnquiryName('')
-        setEnquiryEmail('')
-        setSelectedProduct(null)
-      } else {
-        showToast('Failed to submit enquiry', 'error')
-      }
-    } catch {
-      showToast('Server error', 'error')
-    }
-    setSubmitting(false)
-  }
-
-  // Fallback products (used when DB has no products yet)
-  const defaultProducts = [
-    { id: 1, name: 'Marina Lounge Chair', selling_price: 1099, images: ['https://images.unsplash.com/photo-1550254478-ead40cc54513?auto=format&fit=crop&w=800&q=80'] },
-    { id: 2, name: 'Haven Three Seat Sofa', selling_price: 2199, images: ['https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=800&q=80'] },
-    { id: 3, name: 'Ember Two Seat Sofa', selling_price: 1699, images: ['https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=800&q=80'] },
-    { id: 4, name: 'Harbour Corner Sofa', selling_price: 2899, images: ['https://images.unsplash.com/photo-1540574163026-643ea20ade25?auto=format&fit=crop&w=800&q=80'] },
-  ]
-
   const displayProducts = products.length > 0 ? products : defaultProducts
+  const maxSlide = Math.max(0, displayProducts.length - slidesPerView)
+
+  const nextSlide = () => setCurrentSlide((p) => Math.min(p + 1, maxSlide))
+  const prevSlide = () => setCurrentSlide((p) => Math.max(p - 1, 0))
+
+  const getWeeklyPrice = (price) => {
+    if (!price) return null
+    return Math.ceil(Number(price) / 52)
+  }
 
   return (
     <section className={`products ${compact ? 'compact' : ''}`} id={sectionId}>
-      <div className="section-title">
-        <span>{label}</span>
-        <h2>{title}</h2>
-      </div>
-
-      {/* Product cards grid */}
-      <div className="product-grid">
-        {displayProducts.map((p) => (
-          <article key={p.id} className="product-card">
-            <img
-              src={p.images && p.images.length > 0 && !p.images[0].startsWith('[') ? p.images[0] : 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=800&q=80'}
-              alt={p.name}
-            />
-            <h3>{p.name}</h3>
-            <p>${p.selling_price ? Number(p.selling_price).toLocaleString() : p.mrp ? Number(p.mrp).toLocaleString() : '0'}</p>
-            <button onClick={() => handleEnquiryClick(p)}>Add to enquiry</button>
-          </article>
-        ))}
-      </div>
-
-      {/* Enquiry Modal */}
-      {showEnquiryForm && (
-        <div className="enquiry-modal-overlay" onClick={() => setShowEnquiryForm(false)}>
-          <div className="enquiry-modal" onClick={(e) => e.stopPropagation()}>
-            {toast && <div className={`toast ${toast.type}`}>{toast.msg}</div>}
-            <h3>Enquire about {selectedProduct?.name}</h3>
-            <form onSubmit={handleEnquirySubmit}>
-              <div className="input-group">
-                <label>Your Name</label>
-                <input type="text" value={enquiryName} onChange={(e) => setEnquiryName(e.target.value)} placeholder="Enter your name" required />
-              </div>
-              <div className="input-group">
-                <label>Your Email</label>
-                <input type="email" value={enquiryEmail} onChange={(e) => setEnquiryEmail(e.target.value)} placeholder="Enter your email" required />
-              </div>
-              <div className="form-actions">
-                <button type="button" className="btn-secondary" onClick={() => setShowEnquiryForm(false)}>Cancel</button>
-                <button type="submit" className="btn-primary" disabled={submitting}>
-                  {submitting ? 'Sending...' : 'Send Enquiry'}
-                </button>
-              </div>
-            </form>
-          </div>
+      {label && (
+        <div className="section-title">
+          <span>{label}</span>
+          {title && <h2>{title}</h2>}
         </div>
       )}
+
+      <div className="product-slider-wrapper">
+        <button className="slider-btn slider-btn-prev" onClick={prevSlide} disabled={currentSlide === 0}>&#8249;</button>
+        <div className="product-slider" ref={sliderRef}>
+          <div
+            className="product-slider-track"
+            style={{ transform: `translateX(-${currentSlide * (100 / slidesPerView)}%)` }}
+          >
+            {displayProducts.map((p) => {
+              const imgSrc = p.images && p.images.length > 0 && !p.images[0].startsWith('[') ? p.images[0] : 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=800&q=80'
+              const weekly = getWeeklyPrice(p.selling_price || p.mrp)
+              const hasDiscount = p.selling_price && p.mrp && Number(p.selling_price) < Number(p.mrp)
+              return (
+                <article key={p.id} className="product-card">
+                  <div className="product-card-img">
+                    <img src={imgSrc} alt={p.name} />
+                    {hasDiscount && <span className="product-badge">SALE</span>}
+                  </div>
+                  <div className="product-card-body">
+                    <h3>{p.name}</h3>
+                    <div className="product-pricing">
+                      {p.selling_price && (
+                        <span className="product-price">${Number(p.selling_price).toLocaleString()}</span>
+                      )}
+                      {p.mrp && p.selling_price && Number(p.mrp) !== Number(p.selling_price) && (
+                        <span className="product-mrp">${Number(p.mrp).toLocaleString()}</span>
+                      )}
+                      {!p.selling_price && p.mrp && (
+                        <span className="product-price">${Number(p.mrp).toLocaleString()}</span>
+                      )}
+                    </div>
+                    {weekly && (
+                      <p className="product-weekly">Or just <strong>${weekly}/week</strong> on finance</p>
+                    )}
+                    {p.material && <p className="product-meta">{p.material}{p.color ? ` - ${p.color}` : ''}</p>}
+                    <button className="btn-shop-now">Shop Now</button>
+                  </div>
+                </article>
+              )
+            })}
+          </div>
+        </div>
+        <button className="slider-btn slider-btn-next" onClick={nextSlide} disabled={currentSlide >= maxSlide}>&#8250;</button>
+      </div>
+
+      <div className="slider-arrows">
+        <button className="arrow-btn" onClick={prevSlide} disabled={currentSlide === 0}>&#8249;</button>
+        <button className="arrow-btn" onClick={nextSlide} disabled={currentSlide >= maxSlide}>&#8250;</button>
+      </div>
     </section>
   )
 }
