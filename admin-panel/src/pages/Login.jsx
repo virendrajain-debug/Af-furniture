@@ -30,27 +30,13 @@ function Login({ onLogin }) {
     setTimeout(() => setToast(null), 3000)
   }
 
-  // Handle form submission - fake bypass active
+  // Handle form submission - real API call active
   const handleLogin = async (e) => {
     e.preventDefault()
     if (!email || !password) return showToast('Please fill all fields', 'warning')
 
     setLoading(true)
-
-    // ============================================================
-    // FAKE BYPASS LOGIN 
-    // Instantly succeeds and generates a fake token
-    // ============================================================
-    showToast('Login successful! (Bypass Mode)', 'success')
-    setTimeout(() => {
-      onLogin('fake-admin-token-123')
-      setLoading(false)
-    }, 600)
-
-    // ============================================================
-    // REAL API LOGIN (Commented out until server is back on)
-    // ============================================================
-    /*
+    
     try {
       const res = await fetch(`${API_BASE}/api/auth/login`, {
         method: 'POST',
@@ -71,7 +57,6 @@ function Login({ onLogin }) {
     }
     
     setLoading(false)
-    */
   }
 
   return (
